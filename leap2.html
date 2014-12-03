@@ -1,0 +1,87 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Signed Finger Angle</title>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/three.js/r67/three.js"></script>
+    <script src="http://js.leapmotion.com/leap-0.6.2.js"></script>
+    <script src="http://js.leapmotion.com/leap-plugins-0.1.6.1.js"></script>
+    <script src="http://js.leapmotion.com/leap.rigged-hand-0.1.4.min.js"></script>
+    <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+
+    <style>
+      body{
+        font-family: 'Helvetica Neue', Helvetica, Arial, 'Lucida Grande', sans-serif;
+        background: #4686aa;
+      }
+      #output_rad, #output_deg{
+        font-size: 150px;
+        color: #d3d3d3;
+        text-align: center;
+        position: relative;
+        margin: 200px auto;
+        cursor: pointer;
+        opacity: 0.7;
+      }
+      #output_rad{
+        display: none;
+      }
+
+      #progress {
+        background: #000;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        height: 16px;
+        width: 0%;
+      }
+      canvas{
+        z-index: -1;
+      }
+    </style>
+
+  </head>
+
+  <body>
+    
+
+    <div id=output_rad></div>
+    <div id=output_deg></div>
+    <div id=progress></div>
+  </body>
+
+  <script type="text/javascript">
+  
+	var output_rad = document.getElementById('output_rad'),
+	  output_deg = document.getElementById('output_deg'),
+		progress = document.getElementById('progress');
+
+  window.TO_DEG = 180 / Math.PI;
+
+	// Set up the controller:
+	Leap.loop({background: true}, {
+
+    hand: function(hand){
+
+      var d1 = hand.indexFinger.proximal.direction(),
+          d2 = hand.middleFinger.proximal.direction();
+
+      var angle = Math.acos(Leap.vec3.dot(d1, d2));
+
+      var cross = Leap.vec3.create();
+      Leap.vec3.cross(cross, d1, d2);
+
+      var dir = Leap.vec3.dot(hand.palmNormal, cross);
+
+      if (dir < 0) {
+        angle *= -1;
+      }
+
+      output_rad.innerHTML = (angle ).toPrecision(2) + ' rad';
+      output_deg.innerHTML = (angle * TO_DEG).toPrecision(2) + '°';
+
+      progress.style.width = angle * 100 + '%';
+	}
+  });
+  </script>
+</html>
